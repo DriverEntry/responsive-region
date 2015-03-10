@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="./vendor/jquery.js"></script>
+    <script src="./vendor/underscore.js"></script>
+    <script src="./vendor/backbone.js"></script>
+    <script src="./vendor/backbone.marionette.js"></script>
+    <script src="./responsive_region.js"></script>
+</head>
+<body>
+
+    <div class="col-md-offset-3 col-md-6">
+        <h3>Пример загрузочного представления списка на основе Marionette.Region</h3>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <button id="btn-refresh-success" class="btn btn-default">Загрузить успешно</button>
+                <button id="btn-refresh-error" class="btn btn-danger">Загрузитьс ошибкой</button>
+            </div>
+            <div id="list-region" class="panel-body">
+
+            </div>
+        </div>
+    </div>
+    <script type="text/template" id="responsive-region-opacity-template">
+        <div class="js-model-state-error alert alert-danger">
+            Не удалось загрузить данные
+        </div>
+        <div class="js-model-state-sync">
+        </div>
+    </script>
+    <script type="text/javascript">
+        var data = [
+            { id : 1, name : "TODO_1"},
+            { id : 2, name : "TODO_2"},
+            { id : 3, name : "TODO_3"},
+            { id : 4, name : "TODO_4"},
+            { id : 5, name : "TODO_5"},
+            { id : 6, name : "TODO_6"},
+            { id : 7, name : "TODO_7"},
+            { id : 8, name : "TODO_8"},
+            { id : 9, name : "TODO_9"},
+            { id : 10, name : "TODO_10"}
+        ];
+        syncDelay = 2;
+        TodoItemView = Marionette.ItemView.extend({
+            tagName : 'li',
+            className : 'list-group-item',
+            template : _.template('<a><%-name%></a>')
+        });
+        TodoCollectionView = Marionette.CollectionView.extend({
+            tagName : 'ul',
+            className : 'list-group',
+            childView : TodoItemView,
+            emptyView : Marionette.ItemView.extend({
+                template : '<li>Нажмите одну из кнопок "Загрузить", чтобы начать симуляцию получения данных.</li>'
+            })
+        });
+        TodoCollection = Backbone.Collection.extend({
+            sync : function (method, collection, options) {
+                var url = options ? options.url : 'success';
+                collection.trigger('request');
+                setTimeout(function () {
+                   if(url == 'success'){
+                       collection.reset(data);
+                       collection.trigger('sync');
+                   }
+                   else
+                   {
+                       collection.trigger('error');
+                   }
+                },syncDelay * 1000);
+            }
+        });
+        var region = new Marionette.ResponsiveOpacityRegion({el: '#list-region'}),
+            collection = new TodoCollection(),
+            view = new TodoCollectionView({collection : collection});
+        region.show(view);
+
+        $('#btn-refresh-success').click(function () {
+            collection.fetch({url : 'success'});
+        });
+        $('#btn-refresh-error').click(function () {
+            collection.fetch({url : 'error'});
+        });
+
+    </script>
+</body>
+</html>
