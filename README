@@ -1,0 +1,61 @@
+# Marionette.ResponsiveRegion
+
+## Основы
+ResponsiveRegion помогает на уровне Marionette.Region визуализировать состояния модели такие как загрузка, окончание загрузки или ошибка загрузки. Для этого используются события Bakbone.Model/Collection request, sync и error соответственно. По умолчанию обозревается модель или коллекция представления, помещаемого в область через ResponsiveRegion.show(view). Обозреваемая модель может указываться явно через ResponsiveRegion.show(view, options) в options.lookupState.entities.
+
+## Использование
+Наиболее удобно использовать ResponsiveRegion при определнии областей в Marionette.Layout. Вообще же инициализация не отличается от Marionette.Region.
+
+```
+    List.Layout = Marionette.LayoutView.extend({
+...
+        regions : {
+            someRegion : {
+                selector : '#region',
+                regionClass : Marionette.ResponsiveOpacityRegion
+            }
+        }
+...
+    });
+```
+
+## Наследование
+
+Для изменения реакции области на события модели нужно опредлить наследника Marionette.ResponsiveRegion. Наследник может переопределить шаблон обёртки и обработчики изменения состояний, например:
+
+```
+    Marionette.ResponsiveOpacityRegion = Marionette.ResponsiveRegion.extend({
+        handleRequest : function()
+        {
+            this.$el.find('.js-model-state-sync, .js-model-state-error').css('opacity', 0.5);
+        },
+        handleError : function()
+        {
+            this.$el.find('.js-model-state-sync').addClass('hidden');
+            this.$el.find('.js-model-state-error').removeClass('hidden').css('opacity', 1);
+        },
+        handleSync : function()
+        {
+            this.$el.find('.js-model-state-error').addClass('hidden');
+            this.$el.find('.js-model-state-sync').removeClass('hidden').css('opacity', 1);
+        },
+        defaults : {
+            template : '#responsive-region-opacity-template'
+        }
+    });
+
+```
+Методы `handle*` изменяют вид содержимого области при возникновении соотвествующих событий. Способ изменения внешнего вида произвольный, единственное трбование - они должны сохранять представление и его разметку в неизменном виде.
+`defaults` определяет параметры по умолчанию при вызове Marionette.ResponsiveRegion.show(view, options); 
+`defaults.template` это шаблон обёртки (используется bootstrap). Marionette.ResponsiveRegion использует такую разметку:
+```
+    <div class="js-model-state-request alert alert-info">
+        Загрузка ...
+    </div>
+    <div class="js-model-state-error alert alert-danger">
+        Не удалось загрузить данные
+    </div>
+    <div class="js-model-state-sync">
+    </div>
+```
+ Шаблон определяется в соответствии с Marionette.Renderer. От разметки обёртки зависят только обработчики состояний `handle*`. Поэтому при переопределении всех этих методов производный класс может свободно менять разметку обёртки или отключать её совсем (`template : false`);

@@ -4,7 +4,6 @@
         constructor : function(options)
         {
             _.extend(this,Backbone.Events);
-            this._templateCache = {};
             Marionette.Region.prototype.constructor.call(this, options);
         },
 
@@ -50,12 +49,7 @@
             var $content;
             if(this.lookupOptions.template)
             {
-                var $wrapper = $(
-                    this._templateCache[this.lookupOptions.template] =
-                        this._templateCache[this.lookupOptions.template] ||
-                        $(this.lookupOptions.template).html()
-                );
-                
+                var $wrapper = $(Marionette.Renderer.render(this.lookupOptions.template));
                 $wrapper.find('.js-model-state-sync').add($wrapper.filter('.js-model-state-sync')).empty().append(view.el);
                 $content = $wrapper;
             }
