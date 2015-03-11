@@ -31,7 +31,7 @@ QUnit.test("State tracking test", function (assert) {
 
     var model1 = new Backbone.Collection(),
         model2 = new Backbone.Collection(),
-        region = new  Marionette.ResponsiveRegion({el : '#qunit-fixture'}),
+        region = new  Marionette.ResponsiveVisiblityRegion({el : '#qunit-fixture'}),
         viewWithModel = new Marionette.View({collection : model1}),
         viewWithoutModel = new Marionette.View();
 
@@ -53,7 +53,7 @@ QUnit.test("State tracking test", function (assert) {
             return stateSequence;
         };
 
-    assert.deepEqual(eventSequence, traceState(model1, region, eventSequence),
+    assert.deepEqual(traceState(model1, region, eventSequence),eventSequence,
         'Region follows model state with implicit binding');
 
     region.show(viewWithoutModel, {
@@ -81,7 +81,7 @@ QUnit.test("State tracking test", function (assert) {
         'Region doesnt use implicit binding when model is provided with options');
 });
 
-styleTest("Base region styling test", Marionette.ResponsiveRegion, {
+styleTest("Visibility region styling test", Marionette.ResponsiveVisiblityRegion, {
     request : function(){
         return !this.$el.find('.js-model-state-request').hasClass('hidden') &&
             this.$el.find('.js-model-state-error').hasClass('hidden') &&
@@ -124,7 +124,7 @@ styleTest("Opacity region styling test", Marionette.ResponsiveOpacityRegion, {
 QUnit.test("Ignore bubbled events", function (assert) {
     var collection = new Backbone.Collection(),
         model = new Backbone.Model(),
-        region = new  Marionette.ResponsiveRegion({el : '#qunit-fixture'}),
+        region = new  Marionette.ResponsiveVisiblityRegion({el : '#qunit-fixture'}),
         view = new Marionette.View({collection : collection});
     region.show(view, {
         lookupState : true
@@ -139,7 +139,7 @@ QUnit.test("Ignore bubbled events", function (assert) {
 QUnit.test("Observing multiple models", function (assert) {
     var collection = new Backbone.Collection(),
         model = new Backbone.Model(),
-        region = new  Marionette.ResponsiveRegion({el : '#qunit-fixture'}),
+        region = new  Marionette.ResponsiveVisiblityRegion({el : '#qunit-fixture'}),
         view = new Marionette.View({collection : collection});
     region.show(view, {
         lookupState : {

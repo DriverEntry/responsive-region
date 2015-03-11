@@ -55,7 +55,8 @@
             className : 'list-group',
             childView : TodoItemView,
             emptyView : Marionette.ItemView.extend({
-                template : '<li>Нажмите одну из кнопок "Загрузить", чтобы начать симуляцию получения данных.</li>'
+                template : '<li>Нажмите одну из кнопок "Загрузить", чтобы начать симуляцию получения данных. ' +
+                        'Для визуализации загрузки используется прозрачность.</li>'
             })
         });
         TodoCollection = Backbone.Collection.extend({
