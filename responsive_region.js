@@ -13,15 +13,11 @@
                 lookupState : true
             });
 
-            if (this.lookupOptions)
-            {
-                this._undelegateEvents();
-                this.lookupOptions = null;
-            }
+            this._unhookCurrentModel();
 
             if(options.lookupState)
             {
-                var lookupOptions = this.lookupOptions = _.isBoolean(options.lookupState) ? {} : options.lookupState;
+                var lookupOptions = _.isBoolean(options.lookupState) ? {} : options.lookupState;
 
                 _.defaults(lookupOptions, this.defaults, {
                     entities: this._getEntities(view),
@@ -29,38 +25,34 @@
                     template: false,
                     events : ['sync', 'request', 'error']
                 });
-                this.lookupOptions.entities = _.isArray(this.lookupOptions.entities) ?
-                    this.lookupOptions.entities : [this.lookupOptions.entities];
-            }
+                lookupOptions.entities = _.isArray(lookupOptions.entities) ?
+                    lookupOptions.entities : [lookupOptions.entities];
 
-            Marionette.Region.prototype.show.call(this, view, options);
+                this.template = lookupOptions.template;
 
-            if(options.lookupState)
-            {
+                Marionette.Region.prototype.show.call(this, view, options);
+                this.lookupOptions = lookupOptions;
+                this._getStateChangeInternalHandler(lookupOptions.startState).apply(this);
                 this._delegateEvents();
+            }
+            else
+            {
+                Marionette.Region.prototype.show.call(this, view, options);
             }
         },
         attachHtml : function(view)
         {
-            if(!this.lookupOptions)
-            {
-                return Marionette.Region.prototype.attachHtml.call(this, view);
-            }
+            if(!this.template)
+                return Marionette.Region.prototype.attachHtml.call(this);
 
-            var $content;
-            if(this.lookupOptions.template)
-            {
-                var $wrapper = $(Marionette.Renderer.render(this.lookupOptions.template));
-                $wrapper.find('.js-model-state-sync').add($wrapper.filter('.js-model-state-sync')).empty().append(view.el);
-                $content = $wrapper;
-            }
-            else
-            {
-                $content = $(view.el);
-            }
+            var $wrapper = $(Marionette.Renderer.render(this.template));
+            $wrapper.find('.js-model-state-sync').add($wrapper.filter('.js-model-state-sync')).empty().append(view.el);
 
-            this.$el.empty().append($content);
-            this._getStateChangeInternalHandler(this.lookupOptions.startState).apply(this);
+            this.$el.empty().append($wrapper);
+        },
+        empty : function(){
+            this._unhookCurrentModel();
+            Marionette.Region.prototype.empty.call(this);
         },
         _delegateEvents : function()
         {
@@ -86,6 +78,13 @@
                 this.stopListening(entity);
             }, this);
 
+        },
+        _unhookCurrentModel : function () {
+            if (this.lookupOptions && this.lookupOptions.entities)
+            {
+                this._undelegateEvents();
+                this.lookupOptions.entities = null;
+            }
         },
         _isBubbled: function (target)
         {
